@@ -1,0 +1,22 @@
+# build outputs
+dist/
+
+# editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+
+# python (for build scripts)
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# logs
+*.log
+
+# local-only artifacts (not part of the repo)
+/files/
+.claude/
