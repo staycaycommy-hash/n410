@@ -18,13 +18,16 @@ const IMG_FILES = {
   "sun": "sun.jpg"
 };
 
-// Load images from manifest (assets/images/*)
+// Load images from manifest (assets/images/*). Hero img is already inlined; below-fold images get loading="lazy".
 document.querySelectorAll('[data-img]').forEach(el=>{
   const k=el.getAttribute('data-img');
   if(!IMG_FILES[k])return;
   const src='assets/images/'+IMG_FILES[k];
-  if(el.tagName==='IMG'){ el.src=src; }
-  else { const im=el.querySelector('img'); if(im) im.src=src; }
+  const target=el.tagName==='IMG'?el:el.querySelector('img');
+  if(!target)return;
+  const eagerKeys={light1:1,drone:1,front:1,sun:1,light2:1,side:1};
+  if(!eagerKeys[k]){ target.loading='lazy'; target.decoding='async'; }
+  target.src=src;
 });
 
 // Logo (PNG)
@@ -32,10 +35,24 @@ const _eeg=document.querySelector('.agency-logo');
 if(_eeg && IMG_FILES.eeg_logo) _eeg.src='assets/images/'+IMG_FILES.eeg_logo;
 
 
-// ---- preloader ----
+// ---- preloader: tie to actual page load, honour the fill animation, fail-safe ----
+let preDone=false;
+function finishPreloader(){
+  if(preDone) return;
+  preDone=true;
+  document.getElementById('pre').classList.add('done');
+  startHero();
+}
+// fillup animation runs 1.6s — keep at least that, then exit on window.load
+const PRE_MIN=1700;
+const startMark=performance.now();
 window.addEventListener('load',()=>{
-  setTimeout(()=>{ document.getElementById('pre').classList.add('done'); startHero(); }, 1900);
+  const elapsed=performance.now()-startMark;
+  const wait=Math.max(0, PRE_MIN-elapsed);
+  setTimeout(finishPreloader, wait);
 });
+// Safety net: never block longer than 4s, even if a font/image stalls
+setTimeout(finishPreloader, 4000);
 
 // ---- hero intro choreography ----
 function startHero(){
@@ -112,6 +129,62 @@ function runCount(scope){
   });
 }
 
+// ---- OpenStreetMap (Leaflet) ----
+function initSitemap(){
+  const el=document.getElementById('sitemap');
+  if(!el||typeof L==='undefined'||el.dataset.inited)return;
+  el.dataset.inited='1';
+  const SITE=[4.37583,113.98639];
+  const map=L.map(el,{
+    center:SITE,
+    zoom:16,
+    minZoom:11,
+    maxZoom:18,
+    scrollWheelZoom:false,
+    zoomControl:true,
+    attributionControl:true,
+    dragging:true,
+    tap:true
+  });
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    maxZoom:18,
+    attribution:'&copy; OpenStreetMap'
+  }).addTo(map);
+
+  const siteIcon=L.divIcon({
+    className:'',
+    html:'<div class="m-mark-site"><span class="m-mark-pulse"></span><span class="m-mark-dot"></span><span class="m-mark-label">No410</span></div>',
+    iconSize:[28,28],
+    iconAnchor:[14,14]
+  });
+  L.marker(SITE,{icon:siteIcon,title:'No410 · Lot 410, Block 10, M.C.L.D.',keyboard:false}).addTo(map);
+
+  const destIcon=L.divIcon({
+    className:'',
+    html:'<div class="m-mark-dest"></div>',
+    iconSize:[14,14],
+    iconAnchor:[7,7]
+  });
+  const DESTS=[
+    ['Miri Town Centre','~8 min',4.396,113.991],
+    ['Bintang & Imperial','~8 min',4.404,113.992],
+    ['Riam / Schools','~5 min',4.392,113.982],
+    ['Luak Esplanade','~7 min',4.346,113.953],
+    ['Miri Airport','~10 min',4.323,113.987]
+  ];
+
+  DESTS.forEach(d=>{
+    L.marker([d[2],d[3]],{icon:destIcon,title:d[0]+' · '+d[1]}).addTo(map);
+  });
+
+  // Click to enable scroll-zoom; leaving disables again — keeps page scroll unhijacked.
+  el.addEventListener('click',()=>map.scrollWheelZoom.enable());
+  el.addEventListener('mouseleave',()=>map.scrollWheelZoom.disable());
+}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',()=>setTimeout(initSitemap,0));}
+else{setTimeout(initSitemap,0);}
+window.addEventListener('load',initSitemap);
+
 // ---- plan floor switcher ----
 (function(){
   const tabs=document.querySelectorAll('.plan-tab');
@@ -127,6 +200,72 @@ function runCount(scope){
     if(ftag) ftag.textContent=labels[f];
   }));
 })();
+
+// ---- horizontal-pan bleeds (scroll-pinned panorama) ----
+function initHScrollBleed(bleed){
+  const par=bleed.querySelector('.bleed-pin .par');
+  const img=par&&par.querySelector('img');
+  const hint=bleed.querySelector('.scroll-hint');
+  if(!par||!img)return;
+  let overflow=0;
+  function measure(){
+    const vw=window.innerWidth;
+    const vh=window.innerHeight;
+    overflow=Math.max(0, par.offsetWidth - vw);
+    bleed.style.height=(vh + overflow)+'px';
+    update();
+  }
+  let raf=null;
+  function update(){
+    const rect=bleed.getBoundingClientRect();
+    let progress=0;
+    if(overflow>0){
+      progress=Math.max(0, Math.min(1, -rect.top / overflow));
+    }
+    par.style.transform='translate3d('+(-progress*overflow)+'px,0,0)';
+    if(hint){ hint.style.opacity = progress>0.04 ? '0' : ''; }
+  }
+  function onScroll(){
+    if(raf)return;
+    raf=requestAnimationFrame(()=>{ update(); raf=null; });
+  }
+  function ready(){ measure(); addEventListener('scroll',onScroll,{passive:true}); addEventListener('resize',measure); }
+  if(img.complete && img.naturalWidth) ready();
+  else img.addEventListener('load', ready, {once:true});
+}
+document.querySelectorAll('.bleed').forEach(initHScrollBleed);
+
+// ---- horizontal-pan feature spreads (scroll-pinned, image-only) ----
+function initHScrollFeat(feat){
+  const par=feat.querySelector('.imgwrap .par');
+  const img=par&&par.querySelector('img');
+  const imgwrap=feat.querySelector('.imgwrap');
+  const hint=feat.querySelector('.feat-hint');
+  if(!par||!img||!imgwrap)return;
+  let overflow=0;
+  function measure(){
+    const wrapW=imgwrap.clientWidth;
+    overflow=Math.max(0, par.offsetWidth - wrapW);
+    feat.style.height=overflow>0 ? (window.innerHeight + overflow)+'px' : '';
+    update();
+  }
+  let raf=null;
+  function update(){
+    if(overflow<=0){ par.style.transform=''; return; }
+    const rect=feat.getBoundingClientRect();
+    const progress=Math.max(0, Math.min(1, -rect.top / overflow));
+    par.style.transform='translate3d('+(-progress*overflow)+'px,0,0)';
+    if(hint){ hint.style.opacity = progress>0.04 ? '0' : ''; }
+  }
+  function onScroll(){
+    if(raf)return;
+    raf=requestAnimationFrame(()=>{ update(); raf=null; });
+  }
+  function ready(){ measure(); addEventListener('scroll',onScroll,{passive:true}); addEventListener('resize',measure); }
+  if(img.complete && img.naturalWidth) ready();
+  else img.addEventListener('load', ready, {once:true});
+}
+document.querySelectorAll('.feat').forEach(initHScrollFeat);
 
 // ---- parallax + scroll progress (rAF throttled) ----
 let ticking=false;
@@ -146,12 +285,11 @@ function onScroll(){
       if(pl){pl.style.transform='translate(-50%,calc(-50% - '+(y*0.22)+'px))'; pl.style.opacity=String(Math.max(0,1-y/(vh*0.7)));}
     }
     // generic parallax layers
-    document.querySelectorAll('[data-par] .par, .feat .par, .study .par').forEach(p=>{
+    document.querySelectorAll('.study .par').forEach(p=>{
       const r=p.getBoundingClientRect();
       if(r.bottom<-200||r.top>vh+200)return;
       const mid=r.top+r.height/2-vh/2;
-      const rate=p.closest('.study')?0.04:0.10;
-      p.style.transform='translateY('+(mid*-rate)+'px)';
+      p.style.transform='translateY('+(mid*-0.04)+'px)';
     });
     ticking=false;
   });
