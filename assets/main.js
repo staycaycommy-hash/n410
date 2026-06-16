@@ -9,7 +9,7 @@ const IMG_FILES = {
   "elev_rear": "elev_rear.png",
   "elev_right": "elev_right.png",
   "plan_ground": "plan_ground.png",
-  "plan_first": "plan_first.png",  "eeg_logo": "eeg_logo.png",
+  "plan_first": "plan_first.png",  "eeg_logo": "tvx_logo.svg",
   "front": "front.jpg",
   "drone": "drone.jpg",
   "side": "side.jpg",
@@ -57,9 +57,6 @@ setTimeout(finishPreloader, 4000);
 // ---- hero intro choreography ----
 function startHero(){
   const chars=[...document.querySelectorAll('.hero h1 .ch')];
-  document.getElementById('heroEyebrow').animate(
-    [{opacity:0,transform:'translateY(20px)'},{opacity:1,transform:'none'}],
-    {duration:900,easing:'cubic-bezier(.16,1,.3,1)',fill:'forwards'});
   chars.forEach((c,i)=>{
     c.animate(
       [{opacity:0,transform:'translateY(120%) rotate(6deg)'},{opacity:1,transform:'none'}],
@@ -233,7 +230,7 @@ function initHScrollBleed(bleed){
   if(img.complete && img.naturalWidth) ready();
   else img.addEventListener('load', ready, {once:true});
 }
-document.querySelectorAll('.bleed').forEach(initHScrollBleed);
+document.querySelectorAll('.bleed:not(.nopan)').forEach(initHScrollBleed);
 
 // ---- horizontal-pan feature spreads (scroll-pinned, image-only) ----
 function initHScrollFeat(feat){
@@ -265,7 +262,7 @@ function initHScrollFeat(feat){
   if(img.complete && img.naturalWidth) ready();
   else img.addEventListener('load', ready, {once:true});
 }
-document.querySelectorAll('.feat').forEach(initHScrollFeat);
+document.querySelectorAll('.feat:not(.nopan)').forEach(initHScrollFeat);
 
 // ---- parallax + scroll progress (rAF throttled) ----
 let ticking=false;

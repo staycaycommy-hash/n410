@@ -47,6 +47,7 @@ img{display:block;width:100%;height:100%;object-fit:cover}
 .hero h1{font-family:'Fraunces',serif;font-weight:300;font-size:clamp(3rem,13vw,9rem);line-height:.94;letter-spacing:-.03em;margin:.4rem 0 .1rem}
 .hero h1 .ch{display:inline-block;opacity:0;transform:translateY(120%) rotate(6deg);will-change:transform,opacity}
 .hero h1 em{font-style:italic;color:var(--bronze)}
+.hero h1 .deg{font-size:.42em;vertical-align:.55em;letter-spacing:0;font-style:italic;text-decoration:underline;text-decoration-thickness:.05em;text-underline-offset:.18em;margin-left:.02em}
 .reveal-up{overflow:hidden;display:inline-block}
 .hero .sub,.hero .addr{opacity:0;transform:translateY(20px)}
 .hero .sub{font-size:.84rem;letter-spacing:.22em;text-transform:uppercase;color:var(--ink);margin-top:1.5rem}
@@ -119,6 +120,17 @@ section{position:relative}
 .feat p{font-size:1rem;color:var(--concrete);max-width:420px;line-height:1.6}
 .feat .kw{display:inline-block;color:var(--ink);border-bottom:1px solid var(--bronze)}
 .feat .feat-hint{color:rgba(255,255,255,.9);text-shadow:0 1px 14px rgba(0,0,0,.55);transition:opacity .6s var(--ease)}
+
+/* NO-PAN: show the whole photo, no horizontal scroll-pan */
+.nopan .scroll-hint{display:none!important}
+.feat.nopan .feat-pin{position:static;height:auto;min-height:0;overflow:visible}
+.feat.nopan .imgwrap{height:auto;min-height:0;max-height:none;overflow:visible}
+.feat.nopan .imgwrap .par{position:static;width:100%;height:auto}
+.feat.nopan .imgwrap .par img{position:static;width:100%!important;height:auto!important;object-fit:contain}
+.bleed.nopan{min-height:0}
+.bleed.nopan .bleed-pin{position:static;height:auto;min-height:0;overflow:visible}
+.bleed.nopan .bleed-pin .par{position:static;width:100%;height:auto}
+.bleed.nopan .bleed-pin .par img{position:static;width:100%!important;height:auto!important;object-fit:contain}
 
 /* DESIGN STUDIES */
 .design{background:var(--paper);padding:130px 0;border-top:1px solid var(--line-soft)}
