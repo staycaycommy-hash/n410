@@ -71,10 +71,6 @@ function startHero(){
 
 // ---- split tease into words for sequential reveal ----
 (function(){
-  const p=document.getElementById('teaseP');
-  const html=p.innerHTML;
-  // wrap words while keeping <em> tags
-  const tmp=document.createElement('div'); tmp.innerHTML=html;
   function wrap(node){
     const out=document.createDocumentFragment();
     node.childNodes.forEach(ch=>{
@@ -89,15 +85,20 @@ function startHero(){
     });
     return out;
   }
-  p.innerHTML=''; p.appendChild(wrap(tmp));
+  // split each tease movement independently, preserving <em>/<span> emphasis
+  document.querySelectorAll('.tease-mv').forEach(p=>{
+    const tmp=document.createElement('div'); tmp.innerHTML=p.innerHTML;
+    p.innerHTML=''; p.appendChild(wrap(tmp));
+  });
 })();
 
 // ---- reveal observer ----
 const io=new IntersectionObserver((es)=>{
   es.forEach(e=>{ if(e.isIntersecting){
-    if(e.target.id==='teaseP'){
+    if(e.target.classList.contains('tease-mv')){
+      // stagger restarts per movement, so the second stanza gets its own entrance
       [...e.target.querySelectorAll('.line-word')].forEach((w,i)=>{
-        w.style.transitionDelay=(i*55)+'ms'; w.classList.add('in');
+        w.style.transitionDelay=(i*42)+'ms'; w.classList.add('in');
       });
     } else {
       e.target.classList.add('in');
@@ -107,7 +108,7 @@ const io=new IntersectionObserver((es)=>{
   }});
 },{threshold:.16,rootMargin:'0px 0px -8% 0px'});
 document.querySelectorAll('.rv').forEach((el,i)=>{el.style.transitionDelay=((i%5)*70)+'ms';io.observe(el);});
-io.observe(document.getElementById('teaseP'));
+document.querySelectorAll('.tease-mv').forEach(el=>io.observe(el));
 document.querySelectorAll('.spec .metrics .cell').forEach(c=>io.observe(c));
 
 // ---- number counters ----
@@ -263,6 +264,40 @@ function initHScrollFeat(feat){
   else img.addEventListener('load', ready, {once:true});
 }
 document.querySelectorAll('.feat:not(.nopan)').forEach(initHScrollFeat);
+
+// ---- studies slider (combined photo carousel) ----
+(function(){
+  const root=document.getElementById('studySlider'); if(!root)return;
+  const track=root.querySelector('.slider-track');
+  const slides=[...root.querySelectorAll('.slide')];
+  const dotsWrap=root.querySelector('#sDots');
+  const cur=root.querySelector('#sCur');
+  const n=slides.length; let i=0, timer=null;
+  const rm=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  slides.forEach((_,k)=>{
+    const b=document.createElement('button');
+    b.className='s-dot'+(k?'':' on'); b.type='button';
+    b.setAttribute('aria-label','Go to study '+(k+1));
+    b.addEventListener('click',()=>go(k,true)); dotsWrap.appendChild(b);
+  });
+  const dots=[...dotsWrap.children];
+  function go(k,user){
+    i=(k+n)%n;
+    track.style.transform='translateX(-'+(i*100)+'%)';
+    dots.forEach((d,x)=>d.classList.toggle('on',x===i));
+    if(cur) cur.textContent=String(i+1).padStart(2,'0');
+    if(user) restart();
+  }
+  function restart(){ clearInterval(timer); if(!rm) timer=setInterval(()=>go(i+1),5200); }
+  root.querySelector('.prev').addEventListener('click',()=>go(i-1,true));
+  root.querySelector('.next').addEventListener('click',()=>go(i+1,true));
+  root.addEventListener('mouseenter',()=>clearInterval(timer));
+  root.addEventListener('mouseleave',restart);
+  let sx=null;
+  root.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;},{passive:true});
+  root.addEventListener('touchend',e=>{ if(sx==null)return; const dx=e.changedTouches[0].clientX-sx; if(Math.abs(dx)>40) go(i+(dx<0?1:-1),true); sx=null; });
+  restart();
+})();
 
 // ---- parallax + scroll progress (rAF throttled) ----
 let ticking=false;

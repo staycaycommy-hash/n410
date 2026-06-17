@@ -103,7 +103,8 @@
 
 <!-- TEASE -->
 <section class="tease">
-  <p id="teaseP">For most of our lives we are chasing — the next milestone, the next version of ourselves. The city is the stage where those dreams are built. Yet in time, success changes what it means: measured no longer by what we acquire, but by <em>what we choose to protect</em>.</p>
+  <p class="tease-mv" id="teaseP">For most of our lives we are chasing — the next milestone, the next version of ourselves. The city is the stage where those dreams are built.</p>
+  <p class="tease-mv tease-turn">Yet in time, success changes what it means: measured no longer by <span class="dim">what we acquire</span>, but by <em>what we choose to protect</em>.</p>
 </section>
 
 <!-- DRONE BLEED -->
@@ -198,12 +199,22 @@
       <div class="eyebrow rv">Belonging, In Everyday Light</div>
     </div>
     <p class="intro rv">Not drawings of a house, but glimpses of a life — the garden at golden hour, the walled calm, and the unhurried approach home at the end of a long day.</p>
-    <div class="studies">
-      <div class="study big rv"><div class="par" data-img="d_big"><img alt="Garden-side perspective — cantilever over full-height glazing"></div><div class="tag">St / 01</div><div class="cap">The Garden Side</div></div>
-      <div class="study big rv"><div class="par" data-img="d_aerial"><img alt="Aerial study — walled lot, porch, pool and pavilion"></div><div class="tag">St / 02</div><div class="cap">The Walled Lot</div></div>
-      <div class="study small rv"><div class="par" data-img="d_t1"><img alt="Street approach — vertical timber screen and three-car porch"></div><div class="tag">St / 03</div><div class="cap">The Approach</div></div>
-      <div class="study small rv"><div class="par" data-img="d_t2"><img alt="Three-quarter study — timber fin and full-height glass"></div><div class="tag">St / 04</div><div class="cap">Light &amp; Shade</div></div>
-      <div class="study small rv"><div class="par" data-img="d_t3"><img alt="Aerial three-quarter — porch, pool and pavilion within the lot"></div><div class="tag">St / 05</div><div class="cap">The Whole</div></div>
+    <div class="slider rv" id="studySlider">
+      <div class="slider-viewport">
+        <div class="slider-track">
+          <figure class="slide"><div class="par" data-img="d_big"><img alt="Garden-side perspective — cantilever over full-height glazing"></div><div class="tag">St / 01</div><div class="cap">The Garden Side</div></figure>
+          <figure class="slide"><div class="par" data-img="d_aerial"><img alt="Aerial study — walled lot, porch, pool and pavilion"></div><div class="tag">St / 02</div><div class="cap">The Walled Lot</div></figure>
+          <figure class="slide"><div class="par" data-img="d_t1"><img alt="Street approach — vertical timber screen and three-car porch"></div><div class="tag">St / 03</div><div class="cap">The Approach</div></figure>
+          <figure class="slide"><div class="par" data-img="d_t2"><img alt="Three-quarter study — timber fin and full-height glass"></div><div class="tag">St / 04</div><div class="cap">Light &amp; Shade</div></figure>
+          <figure class="slide"><div class="par" data-img="d_t3"><img alt="Aerial three-quarter — porch, pool and pavilion within the lot"></div><div class="tag">St / 05</div><div class="cap">The Whole</div></figure>
+        </div>
+      </div>
+      <div class="slider-ui">
+        <button class="s-arrow prev" type="button" aria-label="Previous study">&#8592;</button>
+        <div class="s-index"><b id="sCur">01</b> / 05</div>
+        <div class="s-dots" id="sDots"></div>
+        <button class="s-arrow next" type="button" aria-label="Next study">&#8594;</button>
+      </div>
     </div>
   </div>
 </section>
@@ -322,8 +333,7 @@
 
 <!-- CLOSING -->
 <section class="close">
-  <div class="eyebrow rv">Chapter 04 — The Legacy</div>
-  <div class="big rv" style="margin-top:1.6rem">Some houses are built for today.<br>Some homes are built for <em>generations</em>.</div>
+  <div class="big rv">Some houses are built for today.<br>Some homes are built for <em>generations</em>.</div>
   <div class="eyebrow rv" style="margin-top:42px;color:var(--bronze-lt)">No410 — Where You Truly Belong</div>
   <div class="meta">
     <div class="c rv"><div class="l">Expected Completion</div><div class="v serif">End 2026</div></div>
@@ -342,7 +352,7 @@
     <p class="disc">All visuals, illustrations and layouts are artistic impressions and may be refined by the developer's architect or the relevant authorities without prior notice. The contents of this page do not constitute an offer or contract. Approved specification and description are governed by the Sale and Purchase Agreement. Figures are indicative.</p>
   </details>
   <div class="copyline rv">© 2026 Sunhouri Property Holdings Sdn Bhd · No410 · All rights reserved.</div>
-  <div class="copyline rv">© 2026 TVX Group | Real Estate by TVX Sdn Bhd</div>
+  <div class="copyline rv">© 2026 TVX Group | Real Estate</div>
 </section>
 
 
